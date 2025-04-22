@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>송금하기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">송금하기</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">
+          {% for message in messages %}
+            <div>{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('send_money') }}" method="POST">
+        <div class="mb-3">
+            <label for="receiver" class="form-label">수신자 사용자명</label>
+            <input type="text" class="form-control" id="receiver" name="receiver" placeholder="받는 사람의 사용자명" required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">송금 금액</label>
+            <input type="number" class="form-control" id="amount" name="amount" min="1" step="0.01" placeholder="송금할 금액" required>
+        </div>
+        <button type="submit" class="btn btn-primary">송금하기</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">취소</a>
+    </form>
+</div>
+</body>
+</html>

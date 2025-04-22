@@ -1,0 +1,75 @@
+<!-- chat.html - 전체 채팅용 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>전체 채팅</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>전체 채팅</h2>
+  <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;"></div>
+  <input id="message" placeholder="메시지를 입력하세요" />
+  <button onclick="sendMessage()">전송</button>
+  <script>
+    const socket = io();
+    const username = "{{ username }}";
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('message', (data) => {
+      const div = document.createElement('div');
+      div.textContent = `[${data.username}] ${data.message}`;
+      document.getElementById('chat-box').appendChild(div);
+    });
+
+    function sendMessage() {
+      const msg = document.getElementById('message').value;
+      socket.send({ username: username, message: msg });
+      document.getElementById('message').value = '';
+    }
+  </script>
+</body>
+</html>
+
+<!-- private_chat.html - 1:1 채팅용 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>1:1 채팅</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>{{ target_username }}님과의 채팅</h2>
+  <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;"></div>
+  <input id="message" placeholder="메시지를 입력하세요" />
+  <button onclick="sendPrivateMessage()">전송</button>
+
+  <script>
+    const socket = io();
+    const sender = "{{ username }}";
+    const receiver = "{{ target_username }}";
+
+    socket.emit('join_private_room', { sender, receiver });
+
+    socket.on('private_message', (data) => {
+      const div = document.createElement('div');
+      div.textContent = `[${data.sender}] ${data.message}`;
+      document.getElementById('chat-box').appendChild(div);
+    });
+
+    function sendPrivateMessage() {
+      const msg = document.getElementById('message').value;
+      socket.emit('private_message', { sender, receiver, message: msg });
+      document.getElementById('message').value = '';
+    }
+
+    window.onbeforeunload = () => {
+      socket.emit('leave_private_room', { sender, receiver });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<form method="GET" action="{{ url_for('search') }}" class="mb-3">
+    <input type="text" name="q" placeholder="상품명 검색" value="{{ request.args.q or '' }}">
+    <select name="sort">
+      <option value="recent">최신순</option>
+      <option value="price">가격 낮은순</option>
+      <option value="popular">인기순</option>
+    </select>
+    <input type="text" name="category" placeholder="카테고리" value="{{ request.args.category or '' }}">
+    <button type="submit">검색</button>
+  </form>
+  
+  <ul>
+    {% for p in products %}
+      <li><a href="{{ url_for('view_product', product_id=p.id) }}">{{ p.title }} ({{ p.price }}원, 조회수: {{ p.views }})</a></li>
+    {% endfor %}
+  </ul>
+  

@@ -2,16 +2,59 @@
 {% block title %}대시보드{% endblock %}
 {% block content %}
 <h2>대시보드</h2>
+
+<!-- 🔍 상품 검색 폼 -->
+<form action="{{ url_for('search') }}" method="get" class="mb-4 d-flex gap-2">
+  <input type="text" name="q" class="form-control" placeholder="상품명으로 검색" value="{{ request.args.q or '' }}">
+  <select name="sort" class="form-select">
+    <option value="recent">최신순</option>
+    <option value="price">가격 낮은순</option>
+    <option value="popular">인기순</option>
+  </select>
+  <input type="text" name="category" class="form-control" placeholder="카테고리 (선택)" value="{{ request.args.category or '' }}">
+  <button type="submit" class="btn btn-primary">검색</button>
+</form>
+
 <h3>등록된 상품</h3>
 <ul>
   {% for product in products %}
     <li>
       <a href="{{ url_for('view_product', product_id=product.id) }}">{{ product.title }}</a>
-      - 가격: {{ product.price }}
     </li>
   {% endfor %}
 </ul>
 <p><a href="{{ url_for('new_product') }}">새 상품 등록</a></p>
+<p><a href="{{ url_for('send_money') }}">💸 송금하기</a></p>
+
+<h3>거래 내역</h3>
+<table border="1">
+    <tr>
+        <th>송신자</th>
+        <th>수신자</th>
+        <th>금액</th>
+        <th>시간</th>
+    </tr>
+    {% for transaction in transactions %}
+    <tr>
+        <td>{{ transaction.sender }}</td>
+        <td>{{ transaction.receiver }}</td>
+        <td>{{ transaction.amount }} 원</td>
+        <td>{{ transaction.timestamp }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="balance-section">
+  <h3>내 잔액: {{ balance }} 원</h3>
+  <a href="{{ url_for('top_up') }}" class="btn btn-primary">충전하기</a>
+</div>
+
+{% if user['username'] == 'admin' %}
+<hr>
+<h4>🔧 관리자 전용</h4>
+<p><a href="{{ url_for('admin_panel') }}">관리자 페이지 이동</a></p>
+{% endif %}
+
 
 <h3>실시간 채팅</h3>
 <div id="chat">
@@ -19,6 +62,23 @@
   <input id="chat_input" type="text" placeholder="메시지를 입력하세요">
   <button onclick="sendMessage()">전송</button>
 </div>
+
+<hr>
+<h4>1:1 채팅 유저 목록</h4>
+{% if other_users %}
+<ul class="list-group">
+  {% for u in other_users %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    {{ u['username'] }}
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('private_chat', target_username=u['username']) }}">
+      채팅하기
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+  <p class="text-muted">현재 채팅할 수 있는 유저가 없습니다.</p>
+{% endif %}
 
 <script type="text/javascript">
   var socket = io();
@@ -36,7 +96,7 @@
     var input = document.getElementById('chat_input');
     var message = input.value;
     if (message) {
-      socket.emit('send_message', { 'username': "{{ user.username }}", 'message': message });
+      socket.emit('send_message', { 'username': "{{ user['username'] }}", 'message': message });
       input.value = "";
     }
   }

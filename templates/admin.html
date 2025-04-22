@@ -1,0 +1,65 @@
+<h2>관리자 패널</h2>
+
+<h3>신고된 콘텐츠</h3>
+<ul>
+  {% for report in reports %}
+    <li>
+      대상 ID: {{ report.target_id }} | 이유: {{ report.reason }}
+      <form method="post" action="{{ url_for('delete_product', product_id=report.target_id) }}" style="display:inline;">
+        <button class="btn btn-danger btn-sm">삭제</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+
+<hr>
+<h3>전체 사용자 목록</h3>
+<ul>
+  {% for user in users %}
+    <li>{{ user.username }}</li>
+  {% endfor %}
+</ul>
+
+<h3>전체 상품 목록</h3>
+<ul>
+  {% for product in products %}
+    <li>{{ product.title }} ({{ product.price }}원)</li>
+  {% endfor %}
+</ul>
+
+<h3>전체 거래 내역</h3>
+<ul>
+  {% for t in transactions %}
+    <li>{{ t.timestamp }} - {{ t.sender }} → {{ t.receiver }}: {{ t.amount }}원</li>
+  {% endfor %}
+</ul>
+
+<!-- 관리자 상품 리스트 -->
+<h4>상품 관리</h4>
+<ul>
+  {% for p in products %}
+    <li>
+      {{ p.title }} - {{ p.price }}원
+      <form action="{{ url_for('delete_product', product_id=p.id) }}" method="POST" style="display:inline;">
+        <button class="btn btn-danger btn-sm">삭제</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+
+<!-- 관리자 유저 관리 -->
+<h4>유저 관리</h4>
+<ul>
+  {% for u in users %}
+    <li>
+      {{ u.username }}
+      {% if u.is_active %}
+        <form action="{{ url_for('deactivate_user', user_id=u.id) }}" method="POST" style="display:inline;">
+          <button class="btn btn-warning btn-sm">휴면 처리</button>
+        </form>
+      {% else %}
+        <span class="text-muted">휴면 상태</span>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
